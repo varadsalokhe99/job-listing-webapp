@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.nio.file.AccessDeniedException;
 import java.util.List;
 
 @Service
@@ -101,9 +102,18 @@ public class ApplicationService {
     }
 
     // Delete application by ID
-    public void deleteApplication(Long id) {
-        Application application = applicationRepository.findById(id).
-                orElseThrow(() -> new RuntimeException("There is no application with id: "+id));
-        applicationRepository.deleteById(id);
+    public void deleteApplication(Long applicationId, Long userId) {
+        Application application = applicationRepository.findById(applicationId).
+                orElseThrow(() -> new RuntimeException("There is no application with id: "+applicationId));
+
+        if(!application.getUser().getId().equals(userId)){
+            throw new RuntimeException("You are not allowed to delete this application");
+        }
+        applicationRepository.deleteById(applicationId);
     }
- }
+
+
+    public void deleteApplicationById(Long applicationId) {
+        applicationRepository.deleteById(applicationId);
+    }
+}

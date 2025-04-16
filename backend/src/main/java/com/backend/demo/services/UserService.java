@@ -37,7 +37,7 @@ public class UserService {
     // Get User by id
     public User getUserById(Long id){
             return userRepository.findById(id).
-                    orElseThrow(()-> new RuntimeException("User not found by with id : " + id));
+                    orElseThrow(()-> new RuntimeException("User not found with ID: " + id));
     }
 
     // Get User by email id
@@ -56,8 +56,12 @@ public class UserService {
         User user = getUserById(id);
 
         user.setFullName(userDetails.getFullName());
+        if(!user.getEmail().equals(userDetails.getEmail()) &&
+        userRepository.existsByEmail(userDetails.getEmail())){
+            throw new RuntimeException("Email already used by another user");
+        }
         user.setEmail(userDetails.getEmail());
-        if (!userDetails.getPassword().isBlank()) {
+        if (userDetails.getPassword() != null && !userDetails.getPassword().isBlank()) {
             user.setPassword(passwordEncoder.encode(userDetails.getPassword()));
         }
 
@@ -66,6 +70,9 @@ public class UserService {
 
     // Delete User
     public void deleteUserById(Long id){
+        if(!userRepository.existsById(id)){
+            throw new RuntimeException("Cannot delete: User not found with ID: "+id);
+        }
        userRepository.deleteById(id);
     }
 

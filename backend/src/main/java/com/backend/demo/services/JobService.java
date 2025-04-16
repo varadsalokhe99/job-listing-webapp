@@ -58,6 +58,17 @@ public class JobService {
         return jobRepository.save(job);
     }
 
+    // Delete Job by authorized Employer or Admin
+    public void deleteJob(Long jobId, Long userId){
+        Job job = jobRepository.findById(jobId).
+                orElseThrow(()-> new RuntimeException("Job not Found by id: "+jobId));
+
+        if(!job.getPostedBy().getId().equals(userId)){
+            throw new SecurityException("You are not authorized to delete this Job");
+        }
+        jobRepository.delete(job);
+    }
+
     // Delete Job by id
     public void deleteJobById(Long id){
          jobRepository.deleteById(id);
